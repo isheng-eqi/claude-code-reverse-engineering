@@ -1,0 +1,11 @@
+# The analyzed binary - do NOT commit
+claude.exe
+*.exe
+
+# Script outputs
+output/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo

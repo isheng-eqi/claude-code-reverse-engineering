@@ -5,8 +5,8 @@ claude.exe
 # Script outputs
 output/
 
-# Extracted source code (proprietary, do NOT commit)
-decompiled/
+# Extracted source code
+decompiled/*.bytecode
 
 # Bun tmp
 bun.zip

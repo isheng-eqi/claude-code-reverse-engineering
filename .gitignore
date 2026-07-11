@@ -5,6 +5,15 @@ claude.exe
 # Script outputs
 output/
 
+# Extracted source code (proprietary, do NOT commit)
+decompiled/
+
+# Bun tmp
+bun.zip
+bun-tmp/
+bun-extracted/
+tools/
+
 # Python
 __pycache__/
 *.pyc

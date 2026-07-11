@@ -15,18 +15,31 @@ A professional binary reverse engineering analysis of Claude Code — Anthropic'
 | Layer | What We Found | Tool |
 |-------|--------------|------|
 | **PE Structure** | 12 sections, exact layout, entropy analysis | `pefile` |
+| **Source Code** | 16.5 MB `cli.js` (main entry point) extracted from Bun module graph | `05_extract_modules.py` |
 | **String Constants** | 1500+ System Prompt fragments, 1700+ GrowthBook flags, URLs, auth configs | Binary regex + classification |
 | **Execution Flow** | 8-step startup → SSE streaming pipeline (reconstructed from bytecode references) | Pattern matching |
 | **Remote Control** | GrowthBook flag enumeration, `tengu_heron_brook` injection mechanism | String extraction |
+| **Bun Module Graph** | 7 module entries (1 valid), Bun trailer at EOF, VFS file paths | Structural binary parsing |
 
-### What We CANNOT Extract (and why)
+### Source Code Extraction
 
-| Layer | Limitation | Why |
-|-------|-----------|-----|
-| **VFS File Contents** | Only ~16 file paths identified; actual file data is Bun bytecode | `bun build --compile` compiles JS/TS to proprietary bytecode. Extracting source requires a bytecode decompiler (see [bun-decompile](https://www.npmjs.com/package/@shepherdjerred/bun-decompile)) |
-| **Deobfuscated Logic** | Variable names are minified; control flow is bytecoded | Full decompilation is feasible but requires Bun runtime + LLM-based deminification |
+The **main breakthrough** is `scripts/05_extract_modules.py` — a pure-Python parser for Bun's embedded module graph format:
 
-> **Honesty note:** Previous versions of this README claimed 861 VFS files. That was noise from regex matching against cross-references and bytecode artifacts. The `.bun` section actually contains ~16 formal VFS entries — the rest is compiled bytecode.
+```
+┌─────────────────────────────────────────┐
+│  claude.exe (225MB)                     │
+│  ...                                    │
+│  .bun section (138MB)                   │
+│    ├─ Embedded data (bytecode + source) │
+│    ├─ Module entries (36 bytes each)    │
+│    ├─ Offsets structure (32 bytes)      │
+│    └─ Trailer: "\n---- Bun! ----\n"     │
+└─────────────────────────────────────────┘
+```
+
+Run `python scripts/05_extract_modules.py` to extract the entry point module. The extracted `cli.js` (16.5 MB, 17M+ lines) contains the complete Claude Code application logic.
+
+> **Note:** Extracted source code is Anthropic's proprietary software. It is saved to `decompiled/` (gitignored) for local analysis only — never committed to this repository.
 
 ---
 
